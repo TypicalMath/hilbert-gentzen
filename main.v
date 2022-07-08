@@ -5,7 +5,6 @@ Inductive Formula : Type :=
     | disj : Formula -> Formula -> Formula
     | conj : Formula -> Formula -> Formula
     | imp : Formula -> Formula -> Formula
-    | neg : Formula -> Formula
     | bot : Formula. 
 
 Notation "^ n" := (atom n) (at level 1).
@@ -13,6 +12,7 @@ Notation "x ^| y" := (disj x y) (at level 11, left associativity).
 Notation "x ^& y" := (conj x y) (at level 11, left associativity).
 Notation "x ^>  y" := (imp x y) (at level 12, right associativity).
 Notation "^F" := bot (at level 0).
+Definition neg (A : Formula) : Formula := A ^> ^F.
 Notation "^~ x" := (neg x) (at level 10).
 Definition top := ^~^F.
 Notation "^T" := top (at level 0).
