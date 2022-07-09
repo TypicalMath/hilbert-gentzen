@@ -1,5 +1,7 @@
 From Coq Require Import Sets.Ensembles.
 
+(*Formulas: *)
+
 Inductive Formula : Type :=
     | atom : nat -> Formula
     | disj : Formula -> Formula -> Formula
@@ -8,6 +10,7 @@ Inductive Formula : Type :=
     | neg : Formula -> Formula
     | bot : Formula. 
 
+(*Natural Deduction: *)
 
 Inductive ND : Ensemble Formula -> Formula -> Prop :=
     | ax (C:Ensemble Formula) (f: Formula) (H:In Formula C  f) : ND C f
@@ -22,9 +25,7 @@ Inductive ND : Ensemble Formula -> Formula -> Prop :=
     | impI (C:Ensemble Formula) (f1 f2:Formula) (H:ND (Union Formula C (Singleton Formula f1)) f2): ND C (imp f1 f2)
     | botE (C:Ensemble Formula) (f:Formula) (H:ND C bot):ND C f.
 
-    Example A1ND: forall(A B : Formula), ND (Empty_set Formula) ((imp A (imp B A))).
-    Proof. intros A B. apply impI. apply impI. apply ax. apply  Union_introl.
-        apply  Union_intror. apply  In_singleton. Qed.    
+(*Helbert: *)
 
 Inductive Hilb : Ensemble Formula -> Formula -> Prop :=
     | Hax (C:Ensemble Formula) (f: Formula) (H:In Formula C  f) : Hilb C f
@@ -37,9 +38,27 @@ Inductive Hilb : Ensemble Formula -> Formula -> Prop :=
     | A7 (C:Ensemble Formula) (f1 f2: Formula)  : Hilb C (imp f2 (disj f1 f2) )
     | A8 (C:Ensemble Formula) (f1 f2 f3: Formula)  : Hilb C (imp (imp f1 f3) (imp (imp f2 f3) (imp (disj f1 f2) f3)) )
     | A9 (C:Ensemble Formula) (f1: Formula)  : Hilb C (imp bot f1 )
-    | MP (C:Ensemble Formula) (f1 f2:Formula) (H1:Hilb C (imp f1 f2)) (H2:Hilb C (f1)): Hilb C f2
-    | Con (C: Ensemble Formula) (f: Formula) (H:In Formula C f) : Hilb C f. 
+    | MP (C:Ensemble Formula) (f1 f2:Formula) (H1:Hilb C (imp f1 f2)) (H2:Hilb C (f1)): Hilb C f2.
+
+(*Deduction Theorem: *)
+
+Lemma Weakening: forall(C:Ensemble Formula) (f1 f2:Formula), Hilb C f2 -> Hilb C (imp f1 f2).
+Proof.
+    intros C f1 f2 H. apply (MP _ _ _ (A1 _ _ _)H).
+Qed.
+
+
+Theorem D_T: forall(C:Ensemble Formula) (f1 f2:Formula), Hilb (Union Formula C (Singleton Formula f1)) f2
+-> Hilb C (imp f1 f2) .
+Proof.
+    intros C f1 f2 H.
+    apply Weakening with (f1:=f1) in H. 
+    induction H.
+    +destruct H.
+
     
+(*Equivalence: *)
+
 Theorem Hilbert_Natural_Deduction_Equivalence: forall (C:Ensemble Formula) (f : Formula), 
     (Hilb C f) <-> (ND C f).
     Proof. intros C. split.
@@ -69,14 +88,21 @@ Theorem Hilbert_Natural_Deduction_Equivalence: forall (C:Ensemble Formula) (f : 
                 --apply ax. apply Union_intror. apply In_singleton.
             ++apply ax. apply Union_intror. apply In_singleton.
         -apply impI. apply botE. apply ax. apply Union_intror. apply In_singleton.
-        (*Whhhaaaaaatttt???!!!!*)
         -apply impE with (f1:=f1).
             ++apply IHHilb1.
             ++apply IHHilb2.
-        -apply ax. apply H.
     +intros H. induction H.
         -apply Hax. apply H.
-        -apply Hax in IHND.
+        -apply (MP _ _ _ (A3 _ _ _ )IHND).
+        -apply (MP _ _ _ (A4 _ _ _ )IHND).
+        -apply (MP _ _ _ (MP _ _ _ (A5 _ _ _ )IHND1)IHND2).
+        -apply D_T in IHND1. apply D_T in IHND2. apply (MP _ _ _(MP _ _ _ (MP _ _ _ (A8 _ _ _ _ )IHND1) IHND2)IHND3).
+        -apply (MP _ _ _ (A6 _ _ _)IHND).
+        -apply (MP _ _ _ (A7 _ _ _)IHND).
+        -apply (MP _ _ _ IHND1 IHND2).
+        -apply D_T in IHND. apply IHND.
+        -apply (MP _ _ _ (A9 _ _)IHND).
+    Qed.
 
 
 
