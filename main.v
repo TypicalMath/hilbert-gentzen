@@ -47,6 +47,7 @@ Proof.
     intros C f1 f2 H. apply (MP _ _ _ (A1 _ _ _)H).
 Qed.
 
+
 Lemma UnProp: forall(A B:Ensemble Formula) (f:Formula), In Formula (Union Formula A B) f -> ((In Formula A f )\/(In Formula B f)).
 Proof.
     intros A B f H. inversion H.
@@ -64,14 +65,20 @@ Proof.
     intros C f. apply (MP C _ _(MP C _ _ (A2 C f (imp f f) f) (A1 C f (imp f f))) (A1 C f f) ).
     Qed.
 
+
+
+
+
 Theorem D_T: forall(C:Ensemble Formula) (f1 f2:Formula), Hilb (Union Formula C (Singleton Formula f1)) f2
 -> Hilb C (imp f1 f2) .
 Proof.
     intros C f1 f2 H.
-    inversion H.
-    +apply UnProp in H0. destruct H0.
-        -apply Weakening. apply Hax. apply H0.
-        -apply SingProp in H0. rewrite <- H0. apply impff.
+    remember (Union Formula C (Singleton Formula f1)) as H0 .
+
+    induction H.
+    +rewrite -> HeqH0 in H. apply UnProp in H. destruct H.
+        -apply Weakening. apply Hax. apply H.
+        -apply SingProp in H. rewrite <- H. apply impff.
     +apply Weakening. apply A1.
     +apply Weakening. apply A2.
     +apply Weakening. apply A3.
@@ -81,10 +88,11 @@ Proof.
     +apply Weakening. apply A7.
     +apply Weakening. apply A8.
     +apply Weakening. apply A9.
-    +
-         
-
-
+    +assert (HeqH1 := HeqH0). apply IHHilb1 in HeqH0. 
+    apply IHHilb2 in HeqH1. 
+    apply (MP _ _ _ (MP _ _ _ (A2 _ _ _ _ ) HeqH0) HeqH1).
+    Qed.
+    
        
 
     
