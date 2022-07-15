@@ -7,7 +7,6 @@ Inductive Formula : Type :=
     | disj : Formula -> Formula -> Formula
     | conj : Formula -> Formula -> Formula
     | imp : Formula -> Formula -> Formula
-    | neg : Formula -> Formula
     | bot : Formula. 
 
 (*Natural Deduction: *)
@@ -142,6 +141,3 @@ Theorem Hilbert_Natural_Deduction_Equivalence: forall (C:Ensemble Formula) (f : 
         -apply D_T in IHND. apply IHND.
         -apply (MP _ _ _ (A9 _ _)IHND).
     Qed.
-
-
-
